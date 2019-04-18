@@ -2,12 +2,11 @@
   "name": "@otiai10/too",
   "version": "1.0.0",
   "description": "Combine multiple processes' Stdout/Stderr/SIGINT to keep them all foreground",
-  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
-    "foo": "bin/foobar.js"
+    "too": "bin/too.js"
   },
   "repository": {
     "type": "git",
