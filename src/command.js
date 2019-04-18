@@ -16,12 +16,23 @@ class Command {
       env: process.env, // TODO: additional env
     });
     stream.stdout.on('data', data => {
-      process.stdout.write(`${this.color}[${this.index}]${RESET}\t${data}`);
+      this.print(process.stdout, data);
     });
     stream.stderr.on('data', data => {
-      process.stderr.write(`${this.color}[${this.index}]${RESET}\t${data}`);
+      this.print(process.stderr, data);
     });
   }
+  print(target, text) {
+    text.toString().trim().split('\n').map(line => {
+      target.write(`${this.head()}\t${line}\n`);
+    })
+  }
+  head() {
+    return `${this.color}[${this.index}] ${this.spell}${RESET}`
+  }
+  // body(message) {
+  //   return message;
+  // }
 }
 
 module.exports = Command;
