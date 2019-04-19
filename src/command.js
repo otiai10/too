@@ -13,6 +13,7 @@ class Command {
   async start() {
     const bin = await lookpath(this.spell, {path: this.opt.path || []});
     if (!bin) return Promise.reject({msg: `command not found: ${this.spell}`, code: 127});
+    this.greet();
     const stream = spawn(this.spell, this.args, {
       killSignal: 'SIGTERM',
       detached: false,
@@ -37,9 +38,12 @@ class Command {
   head() {
     return `${this.color}[${this.index}] ${this.spell}${RESET}`
   }
-  // body(message) {
-  //   return message;
-  // }
+  /**
+   * Show what is actually accepted.
+   */
+  greet() {
+    process.stdout.write(`${this.color}[${this.index}] ${[this.spell, ...this.args].join(' ')}\n`);
+  }
 }
 
 module.exports = Command;
