@@ -1,5 +1,6 @@
 const { spawn } = require('child_process');
 const { colors, RESET } = require('./colors');
+const lookpath = require('lookpath');
 
 class Command {
   constructor(index, spell, args) {
@@ -8,7 +9,9 @@ class Command {
     this.args = args;
     this.color = colors[index % colors.length];
   }
-  start() {
+  async start() {
+    const bin = await lookpath(this.spell);
+    if (!bin) return Promise.reject({msg: `command not found: ${this.spell}`, code: 127});
     const stream = spawn(this.spell, this.args, {
       killSignal: 'SIGTERM',
       detached: false,

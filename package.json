@@ -19,5 +19,8 @@
     "Parallel",
     "SIGINT",
     "ctrl+c"
-  ]
+  ],
+  "dependencies": {
+    "lookpath": "0.0.1"
+  }
 }
