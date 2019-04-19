@@ -21,6 +21,6 @@
     "ctrl+c"
   ],
   "dependencies": {
-    "lookpath": "0.0.1"
+    "lookpath": "0.0.2"
   }
 }

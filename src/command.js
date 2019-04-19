@@ -3,20 +3,24 @@ const { colors, RESET } = require('./colors');
 const lookpath = require('lookpath');
 
 class Command {
-  constructor(index, spell, args) {
+  constructor(index, spell, args, opt) {
     this.index = index;
     this.spell = spell;
     this.args = args;
     this.color = colors[index % colors.length];
+    this.opt = opt;
   }
   async start() {
-    const bin = await lookpath(this.spell);
+    const bin = await lookpath(this.spell, {path: this.opt.path || []});
     if (!bin) return Promise.reject({msg: `command not found: ${this.spell}`, code: 127});
     const stream = spawn(this.spell, this.args, {
       killSignal: 'SIGTERM',
       detached: false,
       stdio: ['pipe', 'pipe', 'pipe'],
-      env: process.env, // TODO: additional env
+      env: {
+        ...process.env,
+        PATH: process.env.PATH + ':' + this.opt.path.join(':'),
+      },
     });
     stream.stdout.on('data', data => {
       this.print(process.stdout, data);

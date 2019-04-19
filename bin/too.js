@@ -1,6 +1,5 @@
 #! /usr/bin/env node
 
-const spawn = require('child_process').spawn;
 const Args = require('../src/args');
 const specs = require('../src/flags');
 const build = require('../src/build');
