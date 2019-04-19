@@ -1,5 +1,5 @@
 const { spawn } = require('child_process');
-const { colors, RESET } = require('./colors');
+const { colors, RESET, UNDERLINE } = require('./colors');
 const lookpath = require('lookpath');
 
 class Command {
@@ -42,7 +42,7 @@ class Command {
    * Show what is actually accepted.
    */
   greet() {
-    process.stdout.write(`${this.color}[${this.index}] ${[this.spell, ...this.args].join(' ')}\n`);
+    process.stdout.write(`${this.color}[${this.index}] ${UNDERLINE}${[this.spell, ...this.args].join(' ')}${RESET}\n`);
   }
 }
 

@@ -37,6 +37,11 @@ class Args {
         if (!spec) return;
         return spec.value;
     }
+    add(key, value) {
+        const spec = this.getSpecByName(key);
+        if (!spec) return;
+        spec.add(spec.value, spec.name, value);    
+    }
 }
 
 module.exports = Args;
