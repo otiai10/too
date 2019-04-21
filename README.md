@@ -46,7 +46,8 @@ Then you will get
 TODO: publish it to npmjs.org
 
 ```sh
-% git clone https://github.com/otiai10/too.js.git
-% cd too.js
-% npm link
+% npm install git+https://git@github.com/otiai10/too.js.git
+
+# I don't like global install :p
+# npm install -g git+https://git@github.com/otiai10/too.js.git
 ```
