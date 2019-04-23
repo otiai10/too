@@ -29,6 +29,9 @@ class Command {
     stream.stderr.on('data', data => {
       this.print(process.stderr, data);
     });
+    stream.on('close', (code) => {
+      this.print(process.stdout, `exit code ${code}`);
+    });
   }
   print(target, text) {
     text.toString().trim().split('\n').map(line => {
