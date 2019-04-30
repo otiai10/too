@@ -29,7 +29,7 @@ I don't wanna do this any more, just wanna run multiple processes and kill them 
 # Usage
 
 ```sh
-% too --cmd `rails server` --cmd `npm start-webpack`
+% too --cmd 'rails server' --cmd 'npm start-webpack'
 ```
 
 Then you will get
