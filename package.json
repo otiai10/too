@@ -6,7 +6,7 @@
     "build": "tsc",
     "validate": "npm run lint && npm run build && npm link && too -c 'echo foo' -c 'echo bar'",
     "lint": "tslint ./src/**/*.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "bin": {
     "too": "dist/bin/too.js"
@@ -30,7 +30,17 @@
     "@types/jest": "^24.0.12",
     "@types/node": "^12.0.0",
     "jest": "^24.7.1",
+    "ts-jest": "^24.0.2",
     "tslint": "^5.16.0",
     "typescript": "^3.4.5"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "moduleDirectories": [
+      "node_modules",
+      "src"
+    ]
   }
 }
