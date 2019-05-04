@@ -89,3 +89,6 @@ typings/
 
 # Application settings
 dist
+
+# Editors
+.vscode
