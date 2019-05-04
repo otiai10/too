@@ -1,20 +1,19 @@
-const path = require('path');
-const fs = require('fs');
-// const Command = require('./command');
-import Command from './command';
+import * as fs from "fs";
+import * as path from "path";
+import Command from "./command";
 
-const __getAdditionalPATH = () => {
+const getAdditionalPATH = () => {
   const additionals = [];
   const cwd = process.cwd();
-  if (fs.existsSync(path.join(cwd, 'package.json'))) {
-    additionals.push(path.join(cwd, 'node_modules', '.bin'));
+  if (fs.existsSync(path.join(cwd, "package.json"))) {
+    additionals.push(path.join(cwd, "node_modules", ".bin"));
   }
   return additionals;
 };
 
 const build = (cmdliketext: string, index: number) => {
-  const [spell, ...args] = cmdliketext.split(' ');
-  const additionalPath = __getAdditionalPATH();
+  const [spell, ...args] = cmdliketext.split(" ");
+  const additionalPath = getAdditionalPATH();
   return new Command(index, spell, args, {path: additionalPath});
 };
 

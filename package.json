@@ -4,7 +4,8 @@
   "description": "Combine multiple processes' Stdout/Stderr/SIGINT to keep them all foreground",
   "scripts": {
     "build": "tsc",
-    "validate": "npm run build && npm link && too -c 'echo foo' -c 'echo bar'",
+    "validate": "npm run lint && npm run build && npm link && too -c 'echo foo' -c 'echo bar'",
+    "lint": "tslint ./src/**/*.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
@@ -27,6 +28,7 @@
   },
   "devDependencies": {
     "@types/node": "^12.0.0",
+    "tslint": "^5.16.0",
     "typescript": "^3.4.5"
   }
 }
