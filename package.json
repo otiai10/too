@@ -4,6 +4,7 @@
   "description": "Combine multiple processes' Stdout/Stderr/SIGINT to keep them all foreground",
   "scripts": {
     "build": "tsc",
+    "validate": "npm run build && npm link && too -c 'echo foo' -c 'echo bar'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {

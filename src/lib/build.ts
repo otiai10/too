@@ -12,7 +12,7 @@ const __getAdditionalPATH = () => {
   return additionals;
 };
 
-const build = (cmdliketext: any, index: any) => {
+const build = (cmdliketext: string, index: number) => {
   const [spell, ...args] = cmdliketext.split(' ');
   const additionalPath = __getAdditionalPATH();
   return new Command(index, spell, args, {path: additionalPath});

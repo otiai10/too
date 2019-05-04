@@ -1,22 +1,27 @@
-const { spawn } = require('child_process');
+import { spawn } from 'child_process';
 const { colors, RESET, UNDERLINE } = require('./colors');
 const lookpath = require('lookpath');
 
+export interface CommandOption {
+  path: string[];
+}
+
 export default class Command {
   color: string;
-  constructor(private index: any, private spell: any, private args: any, private opt: any) {
-    // this.index = index;
-    // this.spell = spell;
-    // this.args = args;
+  constructor(
+    private index: number,
+    private spell: string,
+    private args: string[],
+    private opt: CommandOption = {path: []}
+  ) {
     this.color = colors[index % colors.length];
-    // this.opt = opt;
   }
   async start() {
     const bin = await lookpath(this.spell, {path: this.opt.path || []});
     if (!bin) return Promise.reject({msg: `command not found: ${this.spell}`, code: 127});
     this.greet();
     const stream = spawn(this.spell, this.args, {
-      killSignal: 'SIGTERM',
+      // killSignal: 'SIGTERM',
       detached: false,
       stdio: ['pipe', 'pipe', 'pipe'],
       env: {
@@ -24,18 +29,18 @@ export default class Command {
         PATH: process.env.PATH + ':' + this.opt.path.join(':'),
       },
     });
-    stream.stdout.on('data', (data: any) => {
-      this.print(process.stdout, data);
+    stream.stdout.on('data', (chunk: Buffer) => {
+      this.print(process.stdout, chunk);
     });
-    stream.stderr.on('data', (data: any) => {
-      this.print(process.stderr, data);
+    stream.stderr.on('data', (chunk: Buffer) => {
+      this.print(process.stderr, chunk);
     });
-    stream.on('close', (code: any) => {
+    stream.on('close', (code: number, signal: string) => {
       this.print(process.stdout, `exit code ${code}`);
     });
   }
-  print(target: any, text: any) {
-    text.toString().trim().split('\n').map((line: any) => {
+  print(target: NodeJS.WritableStream, text: Buffer | string) {
+    text.toString().trim().split('\n').map((line: string) => {
       target.write(`${this.head()}\t${line}\n`);
     })
   }

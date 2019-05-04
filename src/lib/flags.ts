@@ -1,5 +1,6 @@
+import { Spec } from "./args";
 
-const specs = [
+const specs: Spec[] = [
   {
     name: 'cmd',
     flags: ['-c', '--cmd'],

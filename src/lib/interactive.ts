@@ -1,10 +1,7 @@
 import { createInterface } from 'readline';
+import Args from './args';
 
-/**
- * @param {*} args 
- * @returns Promise<Args>
- */
-const interactive = (args: any) => {
+const interactive = (args: Args): Promise<Args> => {
     return new Promise(resolve => {
         const r = createInterface({
             input: process.stdin,
