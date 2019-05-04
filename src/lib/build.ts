@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs');
-const Command = require('./command');
+// const Command = require('./command');
+import Command from './command';
 
 const __getAdditionalPATH = () => {
   const additionals = [];
@@ -11,10 +12,10 @@ const __getAdditionalPATH = () => {
   return additionals;
 };
 
-const build = (cmdliketext, index) => {
+const build = (cmdliketext: any, index: any) => {
   const [spell, ...args] = cmdliketext.split(' ');
   const additionalPath = __getAdditionalPATH();
   return new Command(index, spell, args, {path: additionalPath});
 };
 
-module.exports = build;
+export default build;

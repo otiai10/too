@@ -1,12 +1,12 @@
-const readline = require('readline');
+import { createInterface } from 'readline';
 
 /**
  * @param {*} args 
  * @returns Promise<Args>
  */
-const interactive = (args) => {
+const interactive = (args: any) => {
     return new Promise(resolve => {
-        const r = readline.createInterface({
+        const r = createInterface({
             input: process.stdin,
             output: process.stdout,
             prompt: '> ',
@@ -24,4 +24,4 @@ const interactive = (args) => {
     });
 };
 
-module.exports = interactive;
+export default interactive;

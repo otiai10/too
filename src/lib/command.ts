@@ -2,13 +2,14 @@ const { spawn } = require('child_process');
 const { colors, RESET, UNDERLINE } = require('./colors');
 const lookpath = require('lookpath');
 
-class Command {
-  constructor(index, spell, args, opt) {
-    this.index = index;
-    this.spell = spell;
-    this.args = args;
+export default class Command {
+  color: string;
+  constructor(private index: any, private spell: any, private args: any, private opt: any) {
+    // this.index = index;
+    // this.spell = spell;
+    // this.args = args;
     this.color = colors[index % colors.length];
-    this.opt = opt;
+    // this.opt = opt;
   }
   async start() {
     const bin = await lookpath(this.spell, {path: this.opt.path || []});
@@ -23,18 +24,18 @@ class Command {
         PATH: process.env.PATH + ':' + this.opt.path.join(':'),
       },
     });
-    stream.stdout.on('data', data => {
+    stream.stdout.on('data', (data: any) => {
       this.print(process.stdout, data);
     });
-    stream.stderr.on('data', data => {
+    stream.stderr.on('data', (data: any) => {
       this.print(process.stderr, data);
     });
-    stream.on('close', (code) => {
+    stream.on('close', (code: any) => {
       this.print(process.stdout, `exit code ${code}`);
     });
   }
-  print(target, text) {
-    text.toString().trim().split('\n').map(line => {
+  print(target: any, text: any) {
+    text.toString().trim().split('\n').map((line: any) => {
       target.write(`${this.head()}\t${line}\n`);
     })
   }
@@ -49,4 +50,3 @@ class Command {
   }
 }
 
-module.exports = Command;

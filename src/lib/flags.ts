@@ -4,8 +4,8 @@ const specs = [
     name: 'cmd',
     flags: ['-c', '--cmd'],
     value: [],
-    add: (val, flag, next) => { val.push(next); },
+    add: (val: any, flag: any, next: any) => { val.push(next); },
   },
 ];
 
-module.exports = specs;
+export default specs;
