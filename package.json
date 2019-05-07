@@ -6,7 +6,7 @@
     "build": "tsc",
     "validate": "npm run lint && npm run build && npm link && too -c 'echo foo' -c 'echo bar'",
     "lint": "tslint ./src/**/*.ts",
-    "test": "jest"
+    "test": "jest --coverage"
   },
   "bin": {
     "too": "dist/bin/too.js"
@@ -24,7 +24,7 @@
     "ctrl+c"
   ],
   "dependencies": {
-    "lookpath": "0.0.2"
+    "lookpath": "^0.1.0"
   },
   "devDependencies": {
     "@types/jest": "^24.0.12",

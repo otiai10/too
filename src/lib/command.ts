@@ -1,8 +1,6 @@
 import { spawn } from "child_process";
+import { lookpath } from "lookpath";
 import { colors, RESET, UNDERLINE } from "./colors";
-
-// tslint:disable no-var-requires
-const lookpath = require("lookpath");
 
 export interface CommandOption {
   path: string[];
