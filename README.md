@@ -46,11 +46,6 @@ Then you will get
 
 # Install
 
-TODO: publish it to npmjs.org
-
 ```sh
-% npm install git+https://git@github.com/otiai10/too.js.git
-
-# I don't like global install :p
-# npm install -g git+https://git@github.com/otiai10/too.js.git
+% npm install too
 ```

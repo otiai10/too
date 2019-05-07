@@ -1,6 +1,6 @@
 {
-  "name": "@otiai10/too",
-  "version": "1.0.0",
+  "name": "too",
+  "version": "1.0.1",
   "description": "Combine multiple processes' Stdout/Stderr/SIGINT to keep them all foreground",
   "scripts": {
     "build": "tsc",
