@@ -1,6 +1,6 @@
 {
   "name": "too",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "Combine multiple processes' Stdout/Stderr/SIGINT to keep them all foreground",
   "scripts": {
     "build": "tsc",
