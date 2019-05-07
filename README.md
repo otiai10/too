@@ -1,6 +1,7 @@
 # too
 
 [![CircleCI](https://circleci.com/gh/otiai10/too.js.svg?style=svg)](https://circleci.com/gh/otiai10/too.js)
+[![codecov](https://codecov.io/gh/otiai10/too.js/branch/master/graph/badge.svg)](https://codecov.io/gh/otiai10/too.js)
 
 The opposite of `tee` command, combining stdout/stderr from multiple commands and kill them with one signal (Ctrl+C).
 
