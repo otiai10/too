@@ -2,6 +2,7 @@
 
 [![CircleCI](https://circleci.com/gh/otiai10/too.js.svg?style=svg)](https://circleci.com/gh/otiai10/too.js)
 [![codecov](https://codecov.io/gh/otiai10/too.js/branch/master/graph/badge.svg)](https://codecov.io/gh/otiai10/too.js)
+[![npm version](https://badge.fury.io/js/too.svg)](https://badge.fury.io/js/too)
 
 The opposite of `tee` command, combining stdout/stderr from multiple commands and kill them with one signal (Ctrl+C).
 
