@@ -6,7 +6,7 @@
     "build": "tsc",
     "validate": "npm run lint && npm run build && npm link && too -c 'echo foo' -c 'echo bar'",
     "lint": "tslint ./src/**/*.ts",
-    "test": "jest --coverage"
+    "test": "jest"
   },
   "bin": {
     "too": "dist/bin/too.js"
@@ -24,7 +24,7 @@
     "ctrl+c"
   ],
   "dependencies": {
-    "lookpath": "^0.1.0"
+    "lookpath": "^1.0.0"
   },
   "devDependencies": {
     "@types/jest": "^24.0.12",
@@ -36,6 +36,10 @@
     "typescript": "^3.4.5"
   },
   "jest": {
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "./src/lib/*.ts"
+    ],
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },

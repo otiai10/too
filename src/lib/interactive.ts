@@ -1,11 +1,19 @@
 import { createInterface } from "readline";
 import Args from "./args";
 
-const interactive = (args: Args): Promise<Args> => {
+export interface IO {
+    stdin?: NodeJS.ReadableStream;
+    stdout?: NodeJS.WritableStream;
+}
+
+const interactive = (args: Args, io: IO = {
+    stdin: process.stdin,
+    stdout: process.stdout,
+}): Promise<Args> => {
     return new Promise((resolve) => {
         const r = createInterface({
-            input: process.stdin,
-            output: process.stdout,
+            input: io.stdin || process.stdin,
+            output: io.stdout || process.stdout,
             prompt: "> ",
         });
         r.prompt();

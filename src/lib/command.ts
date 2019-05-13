@@ -8,6 +8,8 @@ export interface CommandOption {
 
 export default class Command {
   public color: string;
+  public stdout: NodeJS.WritableStream = process.stdout;
+  public stderr: NodeJS.WritableStream = process.stderr;
   constructor(
     private index: number,
     private spell: string,
@@ -30,13 +32,13 @@ export default class Command {
       stdio: ["pipe", "pipe", "pipe"],
     });
     stream.stdout.on("data", (chunk: Buffer) => {
-      this.print(process.stdout, chunk);
+      this.print(this.stdout, chunk);
     });
     stream.stderr.on("data", (chunk: Buffer) => {
-      this.print(process.stderr, chunk);
+      this.print(this.stderr, chunk);
     });
     stream.on("close", (code: number, signal: string) => {
-      this.print(process.stdout, `exit code ${code}`);
+      this.print(this.stdout, `exit code ${code}`);
     });
   }
   public print(target: NodeJS.WritableStream, text: Buffer | string) {
@@ -51,6 +53,6 @@ export default class Command {
    * Show what is actually accepted.
    */
   public greet() {
-    process.stdout.write(`${this.color}[${this.index}] ${UNDERLINE}${[this.spell, ...this.args].join(" ")}${RESET}\n`);
+    this.stdout.write(`${this.color}[${this.index}] ${UNDERLINE}${[this.spell, ...this.args].join(" ")}${RESET}\n`);
   }
 }
