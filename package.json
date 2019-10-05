@@ -24,7 +24,7 @@
     "ctrl+c"
   ],
   "dependencies": {
-    "lookpath": "^1.0.0"
+    "lookpath": "^1.0.3"
   },
   "devDependencies": {
     "@types/jest": "^24.0.12",
