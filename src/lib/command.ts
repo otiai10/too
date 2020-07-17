@@ -3,7 +3,7 @@ import { lookpath } from "lookpath";
 import { colors, RESET, UNDERLINE } from "./colors";
 
 export interface CommandOption {
-  path: string[];
+  include: string[]; // Additional path
 }
 
 export default class Command {
@@ -14,12 +14,12 @@ export default class Command {
     private index: number,
     private spell: string,
     private args: string[],
-    private opt: CommandOption = {path: []},
+    private opt: CommandOption = { include: [] },
   ) {
     this.color = colors[index % colors.length];
   }
   public async start() {
-    const bin = await lookpath(this.spell, {path: this.opt.path || []});
+    const bin = await lookpath(this.spell, {include: this.opt.include || []});
     if (!bin) { return Promise.reject({msg: `command not found: ${this.spell}`, code: 127}); }
     this.greet();
     const stream = spawn(this.spell, this.args, {
@@ -27,7 +27,7 @@ export default class Command {
       detached: false,
       env: {
         ...process.env,
-        PATH: process.env.PATH + ":" + this.opt.path.join(":"),
+        PATH: process.env.PATH + ":" + this.opt.include.join(":"),
       },
       stdio: ["pipe", "pipe", "pipe"],
     });

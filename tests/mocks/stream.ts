@@ -1,6 +1,6 @@
 import { Duplex } from "stream";
 
-export default class Stream extends Duplex implements NodeJS.WritableStream, NodeJS.ReadStream {
+export default class DummyStream extends Duplex {
   public _write(chunk: Buffer | string | any, encoding: string, done: () => void) {
     done();
   }
