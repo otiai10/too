@@ -1,7 +1,7 @@
 # too
 
 [![Node.js CI](https://github.com/otiai10/too.js/actions/workflows/node.js.yml/badge.svg)](https://github.com/otiai10/too.js/actions/workflows/node.js.yml)
-[![codecov](https://codecov.io/gh/otiai10/too.js/branch/master/graph/badge.svg)](https://codecov.io/gh/otiai10/too.js)
+[![codecov](https://codecov.io/gh/otiai10/too.js/branch/main/graph/badge.svg?token=CAnYtu8IQV)](https://codecov.io/gh/otiai10/too.js)
 [![Maintainability](https://api.codeclimate.com/v1/badges/7d0171c59182875438bf/maintainability)](https://codeclimate.com/github/otiai10/too.js/maintainability)
 [![npm version](https://badge.fury.io/js/too.svg)](https://badge.fury.io/js/too)
 
@@ -11,6 +11,19 @@ The opposite of `tee` command, combining stdout/stderr from multiple commands an
 -> command 1 stream ─┐
 -> command 2 stream ─┤
                      └─ stdout/stderr/SIGINT to kill both
+```
+
+It means, you can write 2 parallel jobs in 1 npm script!!
+
+```js
+// package.json
+{
+    "scripts": {
+        "start": "too -cmd 'rails s' -cmd 'webpack'"
+        // Start server and client HMR in parallel,
+        // and you can kill both by one Ctrl+C!!
+    },
+}
 ```
 
 This is JavaScript implementation of [`too`](https://github.com/otiai10/too).
@@ -46,8 +59,13 @@ Then you will get
 # And you can kill both by one `Ctrl+C` (SIGINT)
 ```
 
+
 # Install
 
 ```sh
 % npm install too
 ```
+
+# Issues
+
+- https://github.com/otiai10/too.js/issues
