@@ -13,13 +13,12 @@ export default class Args {
 
     public parse(argv: string[]): void {
         this.raw = argv.slice(2);
-        this.raw.reduce<string[]>((prev, curr) => {
-            if (/=/.test(curr)) { return prev.concat(curr.split("=")); }
-            return prev.concat([curr]);
+        this.raw.reduce<string[]>((ctx, v) => {
+            if (/=/.test(v)) { return ctx.concat(v.split("=")); }
+            return ctx.concat([v]);
         }, []).map((e: string, i: number, all: string[]) => {
             const spec = this.findApplicableSpec(e);
-            if (!spec) { return; }
-            spec.add(spec.value, all[i], all[i + 1]);
+            if (spec) spec.add(spec.value, all[i], all[i + 1]);
         });
     }
 
@@ -37,14 +36,12 @@ export default class Args {
 
     public get(key: string): string[] {
         const spec = this.getSpecByName(key);
-        if (!spec) { return []; }
-        return spec.value;
+        return spec ? spec.value : [];
     }
 
     public add(key: string, value: string): void {
         const spec = this.getSpecByName(key);
-        if (!spec) { return; }
-        spec.add(spec.value, spec.name, value);
+        if (spec) spec.add(spec.value, spec.name, value);
     }
 
 }

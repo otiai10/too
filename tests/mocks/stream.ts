@@ -7,4 +7,8 @@ export default class DummyStream extends Duplex {
   public _read(/* size: number */): void {
     this.push("echo 2000\n\n");
   }
+
+  // public on(event: string, listener: (payload: any) => void): this {
+  //   return this;
+  // }
 }
