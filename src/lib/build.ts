@@ -11,7 +11,7 @@ const getAdditionalPATH = () => {
   return additionals;
 };
 
-const build = (cmdliketext: string, index: number) => {
+const build = (cmdliketext: string, index: number): Command => {
   const [spell, ...args] = cmdliketext.split(" ");
   const additionalPath = getAdditionalPATH();
   return new Command(index, spell, args, { include: additionalPath });

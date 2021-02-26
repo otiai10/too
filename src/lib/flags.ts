@@ -2,7 +2,7 @@ import { Spec } from "./args";
 
 const specs: Spec[] = [
   {
-    add: (val: any, flag: any, next: any) => { val.push(next); },
+    add: (val: string[], flag: unknown, next: string) => val.push(next),
     flags: ["-c", "--cmd"],
     name: "cmd",
     value: [],

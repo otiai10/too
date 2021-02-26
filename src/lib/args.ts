@@ -2,8 +2,8 @@
 export interface Spec {
     name: string;
     flags: string[];
-    value: any[];
-    add: (val: any, flag: any, next: any) => void;
+    value: string[];
+    add: (val: string[], flag: unknown, next: string) => void;
 }
 
 export default class Args {
@@ -11,7 +11,7 @@ export default class Args {
     private raw: string[] = [];
     constructor(private specs: Spec[]) {}
 
-    public parse(argv: string[]) {
+    public parse(argv: string[]): void {
         this.raw = argv.slice(2);
         this.raw.reduce<string[]>((prev, curr) => {
             if (/=/.test(curr)) { return prev.concat(curr.split("=")); }
@@ -41,7 +41,7 @@ export default class Args {
         return spec.value;
     }
 
-    public add(key: string, value: any) {
+    public add(key: string, value: string): void {
         const spec = this.getSpecByName(key);
         if (!spec) { return; }
         spec.add(spec.value, spec.name, value);

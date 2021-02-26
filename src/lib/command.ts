@@ -18,7 +18,7 @@ export default class Command {
   ) {
     this.color = colors[index % colors.length];
   }
-  public async start() {
+  public async start(): Promise<unknown> {
     const bin = await lookpath(this.spell, {include: this.opt.include || []});
     if (!bin) { return Promise.reject({msg: `command not found: ${this.spell}`, code: 127}); }
     this.greet();
@@ -37,22 +37,22 @@ export default class Command {
     stream.stderr.on("data", (chunk: Buffer) => {
       this.print(this.stderr, chunk);
     });
-    stream.on("close", (code: number, signal: string) => {
+    stream.on("close", (code: number /* , signal: any */) => {
       this.print(this.stdout, `exit code ${code}`);
     });
   }
-  public print(target: NodeJS.WritableStream, text: Buffer | string) {
+  public print(target: NodeJS.WritableStream, text: Buffer | string): void {
     text.toString().trim().split("\n").map((line: string) => {
       target.write(`${this.head()}\t${line}\n`);
     });
   }
-  public head() {
+  public head(): string {
     return `${this.color}[${this.index}] ${this.spell}${RESET}`;
   }
   /**
    * Show what is actually accepted.
    */
-  public greet() {
+  public greet(): void {
     this.stdout.write(`${this.color}[${this.index}] ${UNDERLINE}${[this.spell, ...this.args].join(" ")}${RESET}\n`);
   }
 }
