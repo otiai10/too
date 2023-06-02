@@ -89,6 +89,10 @@ typings/
 
 # Application settings
 # dist
+.github
+tsconfig.json
+.eslintrc.yml
+tests
 
 # Editors
 .vscode
