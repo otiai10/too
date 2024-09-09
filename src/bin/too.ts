@@ -20,7 +20,7 @@ const main = async () => {
     Command.cleanup(subprocesses, "SIGTERM").then(() => process.exit(1));
   }
   process.on("SIGINT", () => {
-    Command.cleanup(subprocesses, "SIGINT").then(() => process.exit("SIGINT"));
+    Command.cleanup(subprocesses, "SIGINT").then(() => process.exit(2));
   });
 };
 
