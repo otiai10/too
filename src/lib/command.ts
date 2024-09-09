@@ -26,7 +26,7 @@ export default class Command {
     if (!bin) { return Promise.reject({msg: `command not found: ${this.spell}`, code: 127}); }
     this.greet();
     const stream = spawn(this.spell, this.args, {
-      detached: false,
+      detached: true,
       env: {
         ...process.env,
         PATH: [process.env.PATH, ...this.opt.include].join(delimiter),
@@ -39,8 +39,8 @@ export default class Command {
     stream.stderr.on("data", (chunk: Buffer) => {
       this.print(this.stderr, chunk);
     });
-    stream.on("close", (code: number /* , signal: any */) => {
-      this.print(this.stdout, `exit code ${code}`);
+    stream.on("close", (code: number , signal: NodeJS.Signals) => {
+      this.print(this.stdout, `exit code ${code !== null ? code : signal}`);
     });
     return stream;
   }
@@ -60,13 +60,17 @@ export default class Command {
   }
   public static async cleanup(subprocesses: ChildProcess[], signal: NodeJS.Signals): Promise<boolean[]> {
     const promises: Promise<boolean>[] = [];
-    subprocesses.forEach((cmd) => {
+    subprocesses.forEach((proc) => {
       promises.push(new Promise((resolve) => {
-        cmd.on("close", () => {
-          console.log(`[CLOSED][${signal}] ${cmd.pid}: ${cmd.spawnargs.join(" ")}`);
-          resolve(true);
-        });
-        cmd.kill(signal);
+        try {
+          if (proc.pid) process.kill(-proc.pid, signal);
+        } catch (err) {
+          const error = err as { code?: string, message?: string };
+          if (error.code === "ESRCH") return resolve(true);
+          console.error((err as { message?: string }).message);
+          resolve(false);
+        }
+        proc.on("close", () => resolve(true));
       }));
     });
     return Promise.all(promises);
