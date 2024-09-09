@@ -1,6 +1,9 @@
 import { type ChildProcess, spawn } from "child_process";
 import { lookpath } from "lookpath";
 import { colors, RESET, UNDERLINE } from "./colors";
+import path = require("path");
+
+const delimiter = path.delimiter;
 
 export interface CommandOption {
   include: string[]; // Additional path
@@ -26,7 +29,7 @@ export default class Command {
       detached: false,
       env: {
         ...process.env,
-        PATH: process.env.PATH + ":" + this.opt.include.join(":"),
+        PATH: [process.env.PATH, ...this.opt.include].join(delimiter),
       },
       stdio: ["pipe", "pipe", "pipe"],
     });
