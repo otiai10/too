@@ -42,7 +42,6 @@ export default class Command {
     stream.on("close", (code: number /* , signal: any */) => {
       this.print(this.stdout, `exit code ${code}`);
     });
-    stream.on("SIGINT", () => this.goodbye("SIGINT", stream));
     return stream;
   }
   public print(target: NodeJS.WritableStream, text: Buffer | string): void {
@@ -59,12 +58,17 @@ export default class Command {
   public greet(): void {
     this.stdout.write(`${this.color}[${this.index}] ${UNDERLINE}${[this.spell, ...this.args].join(" ")}${RESET}\n`);
   }
-  public goodbye(signal: NodeJS.Signals, proc: ChildProcess): void {
-    this.stdout.write(`${this.color}[${this.index}] ${UNDERLINE}${signal}${RESET}\n`);
-    proc.kill(signal);
-  }
-
   public static async cleanup(subprocesses: ChildProcess[], signal: NodeJS.Signals): Promise<boolean[]> {
-    return Promise.all(subprocesses.map((cmd) => cmd.kill(signal)));
+    const promises: Promise<boolean>[] = [];
+    subprocesses.forEach((cmd) => {
+      promises.push(new Promise((resolve) => {
+        cmd.on("close", () => {
+          console.log(`[CLOSED][${signal}] ${cmd.pid}: ${cmd.spawnargs.join(" ")}`);
+          resolve(true);
+        });
+        cmd.kill(signal);
+      }));
+    });
+    return Promise.all(promises);
   }
 }
