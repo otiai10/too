@@ -1,4 +1,4 @@
-import { spawn } from "child_process";
+import { type ChildProcess, spawn } from "child_process";
 import { lookpath } from "lookpath";
 import { colors, RESET, UNDERLINE } from "./colors";
 
@@ -18,12 +18,11 @@ export default class Command {
   ) {
     this.color = colors[index % colors.length];
   }
-  public async start(): Promise<unknown> {
+  public async start(): Promise<ChildProcess> {
     const bin = await lookpath(this.spell, {include: this.opt.include || []});
     if (!bin) { return Promise.reject({msg: `command not found: ${this.spell}`, code: 127}); }
     this.greet();
     const stream = spawn(this.spell, this.args, {
-      // killSignal: 'SIGTERM',
       detached: false,
       env: {
         ...process.env,
@@ -40,6 +39,7 @@ export default class Command {
     stream.on("close", (code: number /* , signal: any */) => {
       this.print(this.stdout, `exit code ${code}`);
     });
+    return stream;
   }
   public print(target: NodeJS.WritableStream, text: Buffer | string): void {
     text.toString().trim().split("\n").map((line: string) => {
@@ -54,5 +54,9 @@ export default class Command {
    */
   public greet(): void {
     this.stdout.write(`${this.color}[${this.index}] ${UNDERLINE}${[this.spell, ...this.args].join(" ")}${RESET}\n`);
+  }
+
+  public static async cleanup(subprocesses: ChildProcess[], signal: NodeJS.Signals): Promise<boolean[]> {
+    return Promise.all(subprocesses.map((cmd) => cmd.kill(signal)));
   }
 }
