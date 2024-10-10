@@ -1,7 +1,7 @@
 import { type ChildProcess, spawn } from "child_process";
 import { lookpath } from "lookpath";
 import { colors, RESET, UNDERLINE } from "./colors";
-import path = require("path");
+import * as path from "path";
 
 const delimiter = path.delimiter;
 
