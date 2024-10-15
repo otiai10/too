@@ -1,4 +1,4 @@
-import { type ChildProcess, spawn } from "child_process";
+import { type ChildProcess, exec, spawn } from "child_process";
 import { lookpath } from "lookpath";
 import { colors, RESET, UNDERLINE } from "./colors";
 import * as path from "path";
@@ -21,7 +21,7 @@ export default class Command {
   ) {
     this.color = colors[index % colors.length];
   }
-  public async start(): Promise<ChildProcess> {
+  public async start(env = {}): Promise<ChildProcess> {
     const bin = await lookpath(this.spell, {include: this.opt.include || []});
     if (!bin) { return Promise.reject({msg: `command not found: ${this.spell}`, code: 127}); }
     this.greet();
@@ -29,8 +29,10 @@ export default class Command {
       detached: true,
       env: {
         ...process.env,
+        ...env,
         PATH: [process.env.PATH, ...this.opt.include].join(delimiter),
       },
+      shell: true,
       stdio: ["pipe", "pipe", "pipe"],
     });
     stream.stdout.on("data", (chunk: Buffer) => {
@@ -52,6 +54,30 @@ export default class Command {
   public head(): string {
     return `${this.color}[${this.index}] ${this.spell}${RESET}`;
   }
+
+  /**
+   * Execute the command synchronously.
+   */
+  public async exec(env = {}): Promise<number> {
+    const bin = await lookpath(this.spell, {include: this.opt.include || []});
+    if (!bin) { return Promise.reject({msg: `command not found: ${this.spell}`, code: 127}); }
+    this.greet();
+    const cmd = [this.spell, ...this.args].join(" ");
+    return new Promise((resolve, reject) => {
+      exec(cmd, {
+        env: {
+          ...process.env,
+          ...env,
+        },
+      }, (err, stdout, stderr) => {
+        if (err) return reject(err);
+        if (stdout) this.print(this.stdout, stdout);
+        if (stderr) this.print(this.stderr, stderr);
+        return resolve(0);
+      });
+    });
+  }
+
   /**
    * Show what is actually accepted.
    */

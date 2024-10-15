@@ -5,10 +5,26 @@ import build from "../lib/build";
 import Command from "../lib/command";
 import specs from "../lib/flags";
 import interactive from "../lib/interactive";
+import { Too } from "../lib/file";
 
 const main = async () => {
   const args = new Args(specs);
-  args.parse(process.argv);
+  const rest = args.parse(process.argv);
+  if (rest.length == 1) {
+    const too = await Too.parse(rest[0]);
+    try {
+      await too.prep();
+      const procs = await too.main();
+      process.on("SIGINT", async () => {
+        await Command.cleanup(procs, "SIGINT");
+        await too.post()
+      });
+    } catch (e) {
+      console.error(e);
+      process.exit(1);
+    }
+    return;
+  }
   if (args.get("cmd").length === 0) { await interactive(args); }
   let subprocesses: ChildProcess[] = [];
   try {
