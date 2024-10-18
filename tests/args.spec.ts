@@ -1,5 +1,5 @@
 import Args from "../src/lib/args";
-import specs from "../src/lib/flags";
+import specs from "../src/lib/specs";
 
 describe("Args", () => {
   const examplespec = () => ({

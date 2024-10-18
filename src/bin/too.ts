@@ -1,7 +1,7 @@
 #! /usr/bin/env node
 import Args from "../lib/args";
 import { DefaultLogger } from "../lib/logger";
-import specs from "../lib/spec";
+import specs from "../lib/specs";
 import { Too } from "../lib/too";
 
 const __main__ = async () => {

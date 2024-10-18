@@ -1,14 +1,11 @@
-import Args from "../src/lib/args";
-import specs from "../src/lib/flags";
-import interactive from "../src/lib/interactive";
+import { Too } from "../src/lib/too";
 import Stream from "./mocks/stream";
 
 describe("interactive", () => {
   it("should build commands interactively", async () => {
     const stdin = new Stream();
     const stdout = new Stream();
-    const args = new Args(specs.slice(0));
-    await interactive(args, { stdin, stdout });
-    expect(args.get("cmd")[0]).toBe("echo 2000");
+    const too = await Too.interactive({ stdin, stdout });
+    expect(too.main.jobs[0].oneliner).toBe("echo 2000");
   });
 });
