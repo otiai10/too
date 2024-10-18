@@ -1,6 +1,6 @@
 #! /usr/bin/env node
 import Args from "../lib/args";
-import specs from "../lib/flags";
+import specs from "../lib/spec";
 import { Too } from "../lib/too";
 
 const __main__ = async () => {

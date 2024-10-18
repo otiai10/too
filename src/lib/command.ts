@@ -1,104 +1,103 @@
-// import { type ChildProcess, exec, spawn } from "child_process";
-// import { lookpath } from "lookpath";
-// import { RESET, UNDERLINE } from "./colors";
-// import * as path from "path";
+import * as child_process from 'child_process';
+import * as path from 'path';
+import { lookpath } from 'lookpath';
+import { CYAN, RESET, UNDERLINE } from './colors';
 
-// const delimiter = path.delimiter;
+export class Command {
 
-// export interface CommandOption {
-//   include: string[]; // Additional path
-// }
+  public stdout: NodeJS.WritableStream = process.stdout;
+  public stderr: NodeJS.WritableStream = process.stderr;
+  public label: string;
 
-// export default class Command {
-//   public color: string;
-//   public stdout: NodeJS.WritableStream = process.stdout;
-//   public stderr: NodeJS.WritableStream = process.stderr;
-//   constructor(
-//     private index: number,
-//     private spell: string,
-//     private args: string[],
-//     private opt: CommandOption = { include: [] },
-//   ) {
-//     this.color = colors[index % colors.length];
-//   }
-//   public async start(env = {}): Promise<ChildProcess> {
-//     const bin = await lookpath(this.spell, {include: this.opt.include || []});
-//     if (!bin) { return Promise.reject({msg: `command not found: ${this.spell}`, code: 127}); }
-//     this.greet();
-//     const stream = spawn(this.spell, this.args, {
-//       detached: true,
-//       env: {
-//         ...process.env,
-//         ...env,
-//         PATH: [process.env.PATH, ...this.opt.include].join(delimiter),
-//       },
-//       shell: true,
-//       stdio: ["pipe", "pipe", "pipe"],
-//     });
-//     stream.stdout.on("data", (chunk: Buffer) => {
-//       this.print(this.stdout, chunk);
-//     });
-//     stream.stderr.on("data", (chunk: Buffer) => {
-//       this.print(this.stderr, chunk);
-//     });
-//     stream.on("close", (code: number , signal: NodeJS.Signals) => {
-//       this.print(this.stdout, `exit code ${code !== null ? code : signal}`);
-//     });
-//     return stream;
-//   }
-//   public print(target: NodeJS.WritableStream, text: Buffer | string): void {
-//     text.toString().trim().split("\n").map((line: string) => {
-//       target.write(`${this.head()}\t${line}\n`);
-//     });
-//   }
-//   public head(): string {
-//     return `${this.color}[${this.index}] ${this.spell}${RESET}`;
-//   }
+  private command: string;
+  private args: string[];
 
-//   /**
-//    * Execute the command synchronously.
-//    */
-//   public async exec(env = {}): Promise<number> {
-//     const bin = await lookpath(this.spell, {include: this.opt.include || []});
-//     if (!bin) { return Promise.reject({msg: `command not found: ${this.spell}`, code: 127}); }
-//     this.greet();
-//     const cmd = [this.spell, ...this.args].join(" ");
-//     return new Promise((resolve, reject) => {
-//       exec(cmd, {
-//         env: {
-//           ...process.env,
-//           ...env,
-//         },
-//       }, (err, stdout, stderr) => {
-//         if (err) return reject(err);
-//         if (stdout) this.print(this.stdout, stdout);
-//         if (stderr) this.print(this.stderr, stderr);
-//         return resolve(0);
-//       });
-//     });
-//   }
+  constructor(
+    public oneliner: string,
+    public env: Record<string, string> = {},
+    public color: string = CYAN,
+    label?: string,
+  ) {
+    // FIXME: 乱暴な分割なので、スペースを含む引数に対応する
+    const [c, ...a] = this.oneliner.split(" ");
+    this.command = c;
+    this.args = a;
+    this.label = label || this.command;
+  }
 
-//   /**
-//    * Show what is actually accepted.
-//    */
-//   public greet(): void {
-//     this.stdout.write(`${this.color}[${this.index}] ${UNDERLINE}${[this.spell, ...this.args].join(" ")}${RESET}\n`);
-//   }
-//   public static async cleanup(subprocesses: ChildProcess[], signal: NodeJS.Signals): Promise<boolean[]> {
-//     const promises: Promise<boolean>[] = [];
-//     subprocesses.forEach((proc) => {
-//       promises.push(new Promise((resolve) => {
-//         try {
-//           if (proc.pid) process.kill(-proc.pid, signal);
-//         } catch (err) {
-//           const error = err as { code?: string, message?: string };
-//           if (error.code === "ESRCH") return resolve(true);
-//           console.error((err as { message?: string }).message);
-//           resolve(false);
-//         }
-//         proc.on("close", () => resolve(true));
-//       }));
-//     });
-//     return Promise.all(promises);
-//   }
-// }
+  public async start(): Promise<child_process.ChildProcess> {
+  
+    const bin = await lookpath(this.command, { include: this.path() });
+    if (!bin) { return Promise.reject({msg: `command not found: ${this.command}`, code: 127}); }
+  
+    this.greet();
+
+    const stream = child_process.spawn(this.command, this.args, {
+      detached: true,
+      env: {
+        ...process.env, ...this.env,
+        PATH: this.path().join(path.delimiter),
+      },
+      shell: true,
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    stream.stdout.on("data", (chunk: Buffer) => {
+      this.print(this.stdout, chunk);
+    });
+    stream.stderr.on("data", (chunk: Buffer) => {
+      this.print(this.stderr, chunk);
+    });
+    stream.on("close", (code: number , signal: NodeJS.Signals) => {
+      if (code !== 0) {
+        this.print(this.stdout, `exit code ${code !== null ? code : signal}`);
+      }
+    });
+    return stream;
+  }
+
+  private path() {
+    const additionals = [];
+    const cwd = process.cwd();
+    if ((path.join(cwd, "package.json"))) {
+      additionals.push(path.join(cwd, "node_modules", ".bin"));
+    }
+    return [process.env.PATH || "", ...additionals];
+  }
+
+  /**
+   * Execute the command synchronously.
+   */
+  public async exec(env = this.env): Promise<number> {
+    const bin = await lookpath(this.command, { include: this.path() });
+    if (!bin) { return Promise.reject({ msg: `command not found: ${this.command}`, code: 127 }); }
+
+    this.greet();
+
+    return new Promise((resolve, reject) => {
+      child_process.exec(this.oneliner, {
+        env: {
+          ...process.env,
+          ...env,
+        },
+      }, (err, stdout, stderr) => {
+        if (err) return reject(err);
+        if (stdout) this.print(this.stdout, stdout);
+        if (stderr) this.print(this.stderr, stderr);
+        return resolve(0);
+      });
+    });
+  }
+
+  // TODO: たぶん外もっていったほうがいい
+  public greet(): void {
+    this.stdout.write(`${this.color}[${this.label}] ${UNDERLINE}${this.oneliner}${RESET}\n`);
+  }
+  public head(): string {
+    return `${this.color}[${this.label}]${RESET}`;
+  }
+  public print(target: NodeJS.WritableStream, text: Buffer | string): void {
+    text.toString().trim().split("\n").map((line: string) => {
+      target.write(`${this.head()}\t${line}\n`);
+    });
+  }
+}
