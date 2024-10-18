@@ -16,7 +16,7 @@ export class Too {
   constructor(data: ITooFile) {
     this.version = data.version;
     this.env = data.env || {};
-    this.var = Object.fromEntries(Object.entries(data.var || {}).map(([k, v]) => [k, new VarGenerator(v.generate, v.pick)]));
+    this.var = Object.fromEntries(Object.entries(data.var || {}).map(([k, v]) => [k, new VarGenerator(v.generate, v.collect)]));
     this.prep = new SequentialExecutor(data.prep);
     this.main = new ParallelExecutor(data.main);
     this.post = new SequentialExecutor(data.post);
@@ -41,14 +41,14 @@ class VarGenerator {
   private __value?: string;
   constructor(
     private generate: string,
-    private pick: "stdout" | "stderr" = "stdout",
+    private collect: "stdout" | "stderr" = "stdout",
   ) { }
   async value(): Promise<string> {
     if (this.__value) { return this.__value; }
     return new Promise((resolve, reject) => {
       child_process.exec(this.generate, (err, stdout, stderr) => {
         if (err) { return reject(err); }
-        this.__value = (this.pick === "stdout" ? stdout : stderr).trim();
+        this.__value = (this.collect === "stdout" ? stdout : stderr).trim();
         resolve(this.__value);
       });
     })
@@ -63,7 +63,7 @@ class SequentialExecutor {
   ) {
     for (let i = 0; i < definition.steps.length; i++) {
       const step = definition.steps[i];
-      const cmd = new Command(step.run, env, getColorByIndex(i));
+      const cmd = new Command(step.run, env, getColorByIndex(i), step.label);
       this.steps.push(cmd);
     }
   }
@@ -84,7 +84,7 @@ class ParallelExecutor {
   ) {
     for (let i = 0; i < definition.jobs.length; i++) {
       const job = definition.jobs[i];
-      const cmd = new Command(job.run, env, getColorByIndex(i));
+      const cmd = new Command(job.run, env, getColorByIndex(i), job.label);
       this.jobs.push(cmd);
     }
   }
@@ -137,11 +137,12 @@ class Command {
     public oneliner: string,
     public env: Record<string, string> = {},
     public color: string = CYAN,
+    label?: string,
   ) {
     const [c, ...a] = this.oneliner.split(" ");
     this.command = c;
     this.args = a;
-    this.label = this.command;
+    this.label = label || this.command;
   }
 
   public async start(): Promise<child_process.ChildProcess> {

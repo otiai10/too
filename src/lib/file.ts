@@ -12,18 +12,19 @@ export interface ISequential {
     steps: {
         name: string;
         run: string;
+        label?: string;
         ignore_error?: boolean;
     }[];
 }
 export interface IParallel {
     jobs: {
         name: string;
-        label: string;
         run: string;
+        label?: string;
     }[];
 }
 interface IVarPicker {
     use?: string;
     generate: string;
-    pick?: "stdout" | "stderr";
+    collect?: "stdout" | "stderr";
 }
