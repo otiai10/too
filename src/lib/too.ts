@@ -87,18 +87,18 @@ export class Too {
       await this.prep.run();
     } catch (e) {
       await this.post.run();
-      return 1;
+      return (e as { code: number }).code || 1;
     }
     try {
       await this.main.run();
     } catch (e) {
       await this.post.run();
-      return 1;
+      return (e as { code: number }).code || 1;
     }
     try {
       await this.post.run();
     } catch (e) {
-      return 1;
+      return (e as { code: number }).code || 1;
     }
     return 0;
   }
