@@ -5,6 +5,7 @@ import { IParallel, ISequential, ITooFile } from './file';
 import * as path from 'path';
 import { lookpath } from 'lookpath';
 import { CYAN, getColorByIndex, RESET, UNDERLINE } from './colors';
+import { createInterface } from 'readline';
 
 export class Too {
   version: number = 0;
@@ -34,6 +35,48 @@ export class Too {
     too.main.env = { ...too.env };
     too.post.env = { ...too.env };
     return too;
+  }
+
+  static async direct(cmds: string[]): Promise<Too> {
+    const data = {
+      version: 1,
+      main: {
+        jobs: cmds.map((cmd) => ({ run: cmd })),
+      },
+    } as ITooFile;
+    return new Too(data);
+  }
+
+  static async interactive(io: {
+    stdin?: NodeJS.ReadableStream;
+    stdout?: NodeJS.WritableStream;
+  } = {
+    stdin: process.stdin,
+    stdout: process.stdout,
+  }): Promise<Too> {
+    return new Promise((resolve) => {
+      const data = {
+        version: 1,
+        main: {
+          jobs: [],
+        },
+      } as ITooFile;
+      const r = createInterface({
+        input: io.stdin || process.stdin,
+        output: io.stdout || process.stdout,
+        prompt: "> ",
+      });
+      r.prompt();
+      r.on("line", (line) => {
+        if (line.trim().length === 0) {
+          resolve(new Too(data));
+          r.close();
+        } else {
+          data.main.jobs.push({ run: line });
+          r.prompt();
+        }
+      });
+    })
   }
 }
 
@@ -139,6 +182,7 @@ class Command {
     public color: string = CYAN,
     label?: string,
   ) {
+    // FIXME: 乱暴な分割なので、スペースを含む引数に対応する
     const [c, ...a] = this.oneliner.split(" ");
     this.command = c;
     this.args = a;
@@ -168,7 +212,9 @@ class Command {
       this.print(this.stderr, chunk);
     });
     stream.on("close", (code: number , signal: NodeJS.Signals) => {
-      this.print(this.stdout, `exit code ${code !== null ? code : signal}`);
+      if (code !== 0) {
+        this.print(this.stdout, `exit code ${code !== null ? code : signal}`);
+      }
     });
     return stream;
   }

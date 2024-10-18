@@ -1,7 +1,7 @@
 
 export interface ITooFile {
     version: number;
-    include: string[];
+    include?: string[];
     env?: Record<string, string>;
     var?: Record<string, IVarPicker>;
     prep?: ISequential;
@@ -10,7 +10,7 @@ export interface ITooFile {
 }
 export interface ISequential {
     steps: {
-        name: string;
+        name?: string;
         run: string;
         label?: string;
         ignore_error?: boolean;
@@ -18,7 +18,7 @@ export interface ISequential {
 }
 export interface IParallel {
     jobs: {
-        name: string;
+        name?: string;
         run: string;
         label?: string;
     }[];
