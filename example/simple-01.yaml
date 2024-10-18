@@ -2,11 +2,9 @@ version: 0
 
 env:
   DATABASE_URI: postgres://postgres:password@localhost:5432/postgres
-
 var:
   CURRENT_DATE:
     generate: date '+%Y-%m%d-%H%M%S'
-    # generate: echo 2024-1011-140230
 
 prep:
   steps:
@@ -14,7 +12,7 @@ prep:
     run: mkdir -p ./devdata/${CURRENT_DATE}
   - name: ファイル作成
     run: |
-      echo "hello" > ./devdata/${CURRENT_DATE}/hello.txt
+      echo "Hello, ${USER}!!!!" > ./devdata/${CURRENT_DATE}/hello.txt
 
 main:
   jobs:
@@ -23,8 +21,8 @@ main:
     label: check
   - name: 継続的なジョブ
     run: sleep 2 && echo "done 2s"
-  - name: 継続的なジョブ（長い）
-    run: sleep 20 && echo "done 20s"
+  # - name: 継続的なジョブ（長い）
+  #   run: sleep 20 && echo "done 20s"
 
 post:
   steps:

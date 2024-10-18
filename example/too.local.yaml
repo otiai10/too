@@ -1,7 +1,7 @@
 # Usage:
-#   too run     too.local.yaml
-#   too explain too.local.yaml
-#   too check   too.local.yaml
+#   too too.local.yaml
+#   too -explain too.local.yaml
+#   too -check   too.local.yaml
 
 version: 0
 # runtime:
@@ -38,7 +38,7 @@ var:
   DATE:
     use: bash
     generate: date '+%Y-%m%d-%H%M%S'
-    pick: stdout
+    collect: stdout
 
 prep:
   steps:
