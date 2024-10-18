@@ -6,7 +6,7 @@ export interface Spec {
     add: (val: string[], flag: unknown, next: string) => void;
 }
 
-export default class Args {
+export class Args {
 
     private raw: string[] = [];
     constructor(private specs: Spec[]) {}

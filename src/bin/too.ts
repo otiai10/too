@@ -1,8 +1,8 @@
 #! /usr/bin/env node
-import Args from "../lib/args";
-import { DefaultLogger } from "../lib/logger";
-import specs from "../lib/specs";
-import { Too } from "../lib/too";
+import { Args } from "../lib/args.js";
+import { DefaultLogger } from "../lib/logger.js";
+import { specs } from "../lib/specs.js";
+import { Too } from "../lib/too.js";
 
 const __main__ = async () => {
   const args = new Args(specs);

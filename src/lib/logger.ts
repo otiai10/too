@@ -1,4 +1,4 @@
-import { RESET, UNDERLINE } from "./colors";
+import { RESET, UNDERLINE } from "./colors.js";
 
 export abstract class Logger {
     abstract stage(stage: string): void;

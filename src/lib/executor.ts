@@ -1,8 +1,8 @@
 import * as child_process from 'child_process';
-import { IParallel, ISequential } from './file';
-import { getColorByIndex } from './colors';
-import { Command } from './command';
-import { DefaultLogger, Logger } from './logger';
+import { IParallel, ISequential } from './file.js';
+import { getColorByIndex } from './colors.js';
+import { Command } from './command.js';
+import { DefaultLogger, Logger } from './logger.js';
 
 export class SequentialExecutor {
   public steps: Command[] = [];
@@ -19,6 +19,7 @@ export class SequentialExecutor {
     }
   }
   async run() {
+    if (this.steps.length === 0) return;
     this.logger.stage(this.state);
     for (const step of this.steps) {
       step.env = { ...step.env, ...this.env };

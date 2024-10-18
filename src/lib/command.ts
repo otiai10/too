@@ -1,8 +1,8 @@
 import * as child_process from 'child_process';
 import * as path from 'path';
 import { lookpath } from 'lookpath';
-import { CYAN } from './colors';
-import { DefaultLogger, Logger } from './logger';
+import { CYAN } from './colors.js';
+import { DefaultLogger, Logger } from './logger.js';
 
 export class Command {
 

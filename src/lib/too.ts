@@ -2,10 +2,10 @@ import * as fs from 'fs';
 import * as yaml from 'js-yaml';
 import { createInterface } from 'readline';
 
-import { ITooFile } from './file';
-import { ParallelExecutor, SequentialExecutor } from './executor';
-import { VarGenerator } from './var';
-import { DefaultLogger, Logger } from './logger';
+import { ITooFile } from './file.js';
+import { ParallelExecutor, SequentialExecutor } from './executor.js';
+import { VarGenerator } from './var.js';
+import { DefaultLogger, Logger } from './logger.js';
 
 export class Too {
   version: number = 0;
