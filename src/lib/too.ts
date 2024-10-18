@@ -5,6 +5,7 @@ import { createInterface } from 'readline';
 import { ITooFile } from './file';
 import { ParallelExecutor, SequentialExecutor } from './executor';
 import { VarGenerator } from './var';
+import { DefaultLogger, Logger } from './logger';
 
 export class Too {
   version: number = 0;
@@ -13,13 +14,14 @@ export class Too {
   public prep: SequentialExecutor;
   public main: ParallelExecutor;
   public post: SequentialExecutor;
+  public logger: Logger = new DefaultLogger();
   constructor(data: ITooFile) {
     this.version = data.version;
     this.env = data.env || {};
     this.var = Object.fromEntries(Object.entries(data.var || {}).map(([k, v]) => [k, new VarGenerator(v.generate, v.collect)]));
-    this.prep = new SequentialExecutor(data.prep);
-    this.main = new ParallelExecutor(data.main);
-    this.post = new SequentialExecutor(data.post);
+    this.prep = new SequentialExecutor("PREP", data.prep);
+    this.main = new ParallelExecutor("MAIN", data.main);
+    this.post = new SequentialExecutor("POST", data.post);
   }
 
   /**
@@ -73,5 +75,31 @@ export class Too {
         else { data.main.jobs.push({ run: line }); r.prompt(); }
       });
     })
+  }
+
+  async run(): Promise<number> {
+    process.on("SIGINT", async () => {
+      await this.main.cleanup("SIGINT");
+      await this.post.run();
+      process.exit(2);
+    });
+    try {
+      await this.prep.run();
+    } catch (e) {
+      await this.post.run();
+      return 1;
+    }
+    try {
+      await this.main.run();
+    } catch (e) {
+      await this.post.run();
+      return 1;
+    }
+    try {
+      await this.post.run();
+    } catch (e) {
+      return 1;
+    }
+    return 0;
   }
 }

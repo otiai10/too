@@ -1,7 +1,8 @@
 import * as child_process from 'child_process';
 import * as path from 'path';
 import { lookpath } from 'lookpath';
-import { CYAN, RESET, UNDERLINE } from './colors';
+import { CYAN } from './colors';
+import { DefaultLogger, Logger } from './logger';
 
 export class Command {
 
@@ -16,6 +17,7 @@ export class Command {
     public oneliner: string,
     public env: Record<string, string> = {},
     public color: string = CYAN,
+    public logger: Logger = new DefaultLogger(),
     label?: string,
   ) {
     // FIXME: 乱暴な分割なので、スペースを含む引数に対応する
@@ -30,7 +32,7 @@ export class Command {
     const bin = await lookpath(this.command, { include: this.path() });
     if (!bin) { return Promise.reject({msg: `command not found: ${this.command}`, code: 127}); }
   
-    this.greet();
+    this.logger.accept(this.label, this.color, this.oneliner);
 
     const stream = child_process.spawn(this.command, this.args, {
       detached: true,
@@ -42,14 +44,14 @@ export class Command {
       stdio: ["pipe", "pipe", "pipe"],
     });
     stream.stdout.on("data", (chunk: Buffer) => {
-      this.print(this.stdout, chunk);
+      this.logger.output(this.label, this.color, chunk, "");
     });
     stream.stderr.on("data", (chunk: Buffer) => {
-      this.print(this.stderr, chunk);
+      this.logger.output(this.label, this.color, "", chunk);
     });
     stream.on("close", (code: number , signal: NodeJS.Signals) => {
       if (code !== 0) {
-        this.print(this.stdout, `exit code ${code !== null ? code : signal}`);
+        this.logger.output(this.label, this.color, "", `exit code ${code !== null ? code : signal}`);
       }
     });
     return stream;
@@ -71,7 +73,7 @@ export class Command {
     const bin = await lookpath(this.command, { include: this.path() });
     if (!bin) { return Promise.reject({ msg: `command not found: ${this.command}`, code: 127 }); }
 
-    this.greet();
+    this.logger.accept(this.label, this.color, this.oneliner);
 
     return new Promise((resolve, reject) => {
       child_process.exec(this.oneliner, {
@@ -81,23 +83,10 @@ export class Command {
         },
       }, (err, stdout, stderr) => {
         if (err) return reject(err);
-        if (stdout) this.print(this.stdout, stdout);
-        if (stderr) this.print(this.stderr, stderr);
+        this.logger.output(this.label, this.color, stdout, stderr);
         return resolve(0);
       });
     });
   }
 
-  // TODO: たぶん外もっていったほうがいい
-  public greet(): void {
-    this.stdout.write(`${this.color}[${this.label}] ${UNDERLINE}${this.oneliner}${RESET}\n`);
-  }
-  public head(): string {
-    return `${this.color}[${this.label}]${RESET}`;
-  }
-  public print(target: NodeJS.WritableStream, text: Buffer | string): void {
-    text.toString().trim().split("\n").map((line: string) => {
-      target.write(`${this.head()}\t${line}\n`);
-    });
-  }
 }

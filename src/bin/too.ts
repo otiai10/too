@@ -1,5 +1,6 @@
 #! /usr/bin/env node
 import Args from "../lib/args";
+import { DefaultLogger } from "../lib/logger";
 import specs from "../lib/spec";
 import { Too } from "../lib/too";
 
@@ -14,30 +15,9 @@ const __main__ = async () => {
   } else {
     too = await Too.interactive();
   }
-  const code = await __run__(too!);
+  too.logger = new DefaultLogger();
+  const code = await too.run();
   process.exit(code);
-};
-
-const __run__ = async (too: Too): Promise<number> => {
-  process.on("SIGINT", async () => {
-    await too.main.cleanup("SIGINT");
-    await too.post.run();
-  });
-  try {
-    await too.prep.run();
-    await too.main.run();
-  } catch (e) {
-    await too.post.run();
-    console.log("DEBUG 1001", e);
-    return 1; // TODO
-  }
-  try {
-    await too.post.run();
-  } catch (e) {
-    console.log("DEBUG 1002", e);
-    return 1; // TODO
-  }
-  return 0;
 };
 
 __main__();
