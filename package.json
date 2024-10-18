@@ -7,7 +7,8 @@
     "build": "tsc",
     "validate": "npm run lint && npm run build && npm link && too -c 'echo foo' -c 'sleep 5' -c 'gcloud beta emulators datastore start --project pricealert-jp' -c 'echo bar'",
     "lint": "eslint ./src/**/*.ts ./tests/**/*.ts",
-    "test": "jest"
+    "test": "jest",
+    "test:bin": "npm run build && node ./dist/bin/too.js -c 'echo foo' -c 'sleep 2' -c 'echo bar'"
   },
   "bin": {
     "too": "dist/bin/too.js"
