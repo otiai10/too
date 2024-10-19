@@ -93,6 +93,9 @@ typings/
 tsconfig.json
 .eslintrc.yml
 tests
+devdata
+src
+example
 
 # Editors
 .vscode
