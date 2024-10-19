@@ -1,0 +1,83 @@
+# Usage:
+#   too too.local.yaml
+#   too -explain too.local.yaml
+#   too -check   too.local.yaml
+
+version: 0
+# runtime:
+#   runs_on: local
+#   prerequisite:
+#     command:
+#       - gcloud
+#       - go
+#       - npm
+#       - curl
+#     num_cpu:
+#       min: 2
+#     memory_gb:
+#       min: 4
+#     validate:
+#     - run: gcloud auth list
+
+include:
+  - secrets.local.yaml
+  - too.local.extends.yaml
+# must_include:
+#   - xxx
+#   - yyy
+
+env:
+  PROJECT_ID: triax-football
+  DATASTORE_PROJECT_ID: triax-football
+  DATASTORE_DATASET: triax-football
+  DATASTORE_EMULATOR_HOST: localhost:8081
+  DATASTORE_EMULATOR_HOST_PATH: localhost:8081/datastore
+  DATASTORE_HOST: http://localhost:8081
+
+var:
+  DATE:
+    use: bash
+    generate: date '+%Y-%m%d-%H%M%S'
+    collect: stdout
+
+prep:
+  steps:
+  - name: devdataのディレクトリをつくっておく
+    run: mkdir -p ./devdata
+  - name: Datastore から Google Cloud Storage に、実データをエクスポート
+    run: |
+      gcloud datastore export \
+        gs://${PROJECT_ID}.appspot.com/datastore-export/${DATE} \
+        --project=${PROJECT_ID}
+  - name: ねんのために5秒待つ
+    run: sleep 5
+  - name: Google Cloud Storage からデータをダウンロード
+    run: |
+      gcloud storage cp -r \
+        gs://${PROJECT_ID}.appspot.com/datastore-export/${DATE} \
+        ./devdata \
+        --project=${PROJECT_ID}
+
+main:
+  jobs:
+  - name: Datastore エミュレータを起動
+    label: datastore
+    run: gcloud beta emulators datastore start --data-dir=./devdata/${DATE} --project=${PROJECT_ID}
+  - name: しょうがないのでAPIで突っ込む
+    label: import
+    run: |
+      curl -X POST http://${DATASTORE_EMULATOR_HOST}/v1/projects/${PROJECT_ID}:import \
+      -H 'Content-Type: application/json' \
+      -d "{\"input_url\": \"${PWD}/devdata/${DATE}/${DATE}.overall_export_metadata\"}"
+  - name: APIサーバ起動
+    label: api
+    run: go run main.go
+  - name: フロントエンドdevサーバ起動
+    label: frontend
+    run: npm run dev
+
+post:
+  steps:
+  - name: Clean up process
+    run: pkill datastore
+    ignore_error: true

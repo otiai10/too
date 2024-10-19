@@ -1,23 +1,24 @@
 {
   "compilerOptions": {
-    "target": "es5",
     "lib": [
       "es2017",
       "es2015",
       "dom",
       "es6"
     ],
-    "moduleResolution": "node",
-    "module": "commonjs",
     "outDir": "./dist",
-    "sourceMap": false,
+    "module": "ESNext",
+    "target": "ESNext",
+    "moduleResolution": "Bundler",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
     "typeRoots": [
       "node_modules/@types"
     ],
     "strict": true
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",

@@ -23,6 +23,7 @@ jobs:
     - run: npm run build
     - run: npm run lint
     - run: npm test -- --coverage
+    # - run: npm run test:bin
   coverage:
     needs: build
     runs-on: ubuntu-latest

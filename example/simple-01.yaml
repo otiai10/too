@@ -1,0 +1,33 @@
+version: 0
+
+env:
+  DATABASE_URI: postgres://postgres:password@localhost:5432/postgres
+var:
+  CURRENT_DATE:
+    generate: date '+%Y-%m%d-%H%M%S'
+
+prep:
+  steps:
+  - name: なんか準備
+    run: mkdir -p ./devdata/${CURRENT_DATE}
+  - name: ファイル作成
+    run: |
+      echo "Hello, ${USER}!!!!" > ./devdata/${CURRENT_DATE}/hello.txt
+    label: create-hello
+
+main:
+  jobs:
+  - name: ファイルの中身確認
+    run: cat ./devdata/${CURRENT_DATE}/hello.txt
+    label: cat-hello
+  - name: 継続的なジョブ
+    run: sleep 2 && echo "done 2s"
+    label: sleep-2
+  # - name: 継続的なジョブ（長い）
+  #   run: sleep 20 && echo "done 20s"
+
+post:
+  steps:
+  - name: 後処理
+    run: rm -rf ./devdata/${CURRENT_DATE}
+    label: cleanup

@@ -6,20 +6,30 @@ export interface Spec {
     add: (val: string[], flag: unknown, next: string) => void;
 }
 
-export default class Args {
+export class Args {
 
     private raw: string[] = [];
     constructor(private specs: Spec[]) {}
 
-    public parse(argv: string[]): void {
+    public parse(argv: string[]): string[] {
         this.raw = argv.slice(2);
-        this.raw.reduce<string[]>((ctx, v) => {
+        const all = this.raw.reduce<string[]>((ctx, v) => {
             if (/=/.test(v)) { return ctx.concat(v.split("=")); }
             return ctx.concat([v]);
-        }, []).map((e: string, i: number, all: string[]) => {
+        }, []);
+        const rest = [];
+        while (all.length > 0) {
+            const e = all[0];
             const spec = this.findApplicableSpec(e);
-            if (spec) spec.add(spec.value, all[i], all[i + 1]);
-        });
+            if (spec) {
+                spec.add(spec.value, e, all[0 + 1]);
+                all.splice(0, 2);
+            } else {
+                rest.push(e);
+                all.splice(0, 1);
+            }
+        }
+        return rest;
     }
 
     public findApplicableSpec(key: string): Spec {

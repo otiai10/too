@@ -1,6 +1,6 @@
 import { Spec } from "./args";
 
-const specs: Spec[] = [
+export const specs: Spec[] = [
   {
     add: (val: string[], flag: unknown, next: string) => val.push(next),
     flags: ["-c", "--cmd"],
@@ -8,5 +8,3 @@ const specs: Spec[] = [
     value: [],
   },
 ];
-
-export default specs;
