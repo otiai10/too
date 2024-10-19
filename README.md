@@ -19,14 +19,12 @@ It means, you can write 2 parallel jobs in 1 npm script!!
 // package.json
 {
     "scripts": {
-        "start": "too -cmd 'rails s' -cmd 'webpack'"
+        "start": "too --cmd 'rails s' --cmd 'webpack'"
         // Start server and client HMR in parallel,
         // and you can kill both by one Ctrl+C!!
     },
 }
 ```
-
-This is JavaScript implementation of [`too`](https://github.com/otiai10/too).
 
 # Why?
 
@@ -59,6 +57,23 @@ Then you will get
 # And you can kill both by one `Ctrl+C` (SIGINT)
 ```
 
+# Too files
+
+Or you can define your tasks on a yaml file
+
+```yaml
+# too.local.yaml
+main:
+    jobs:
+    - run: rails server
+    - run: npm start-webpack
+```
+
+then
+
+```sh
+% too ./too.local.yaml
+```
 
 # Install
 
