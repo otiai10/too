@@ -35,7 +35,7 @@ export class Command {
     this.logger.accept(this.label, this.color, this.oneliner);
 
     const stream = child_process.spawn(this.command, this.args, {
-      detached: true,
+      detached: false,
       env: {
         ...process.env, ...this.env,
         PATH: this.path().join(path.delimiter),
