@@ -7,4 +7,10 @@ export const specs: Spec[] = [
     name: "cmd",
     value: [],
   },
+  {
+    add: (val: string[], flag: unknown, next: string) => val.push(next),
+    flags: ["-V", "--version"],
+    name: "version",
+    value: [],
+  },
 ];
