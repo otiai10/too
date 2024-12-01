@@ -1,5 +1,7 @@
 #! /usr/bin/env node
 import { readFileSync } from "fs";
+import { dirname, resolve } from "path";
+import { fileURLToPath } from "url";
 import { Args } from "../lib/args.js";
 import { DefaultLogger } from "../lib/logger.js";
 import { specs } from "../lib/specs.js";
@@ -9,7 +11,10 @@ const __main__ = async () => {
   const args = new Args(specs);
   const rest = args.parse(process.argv);
   if (args.get("version").length > 0 || rest[0] == "version") {
-    const {version} = JSON.parse(readFileSync("package.json", "utf8"));
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = dirname(__filename);
+    const pkgpath = resolve(__dirname, "../../package.json");
+    const {version} = JSON.parse(readFileSync(pkgpath, "utf8"));
     console.log(`(too) version ${version}`);
     process.exit(0);
   }
