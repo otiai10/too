@@ -1,4 +1,5 @@
 build:
+	npm run lint
 	npm run build
 	npm run test
 	npm run test:bin
