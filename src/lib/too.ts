@@ -44,8 +44,7 @@ export class Too {
     for (const i in too.include.env_files) {
       const data = await fs.promises.readFile(too.include.env_files[i]);
       for (const line of data.toString().split("\n")) {
-        const [k, v] = line.split("=");
-        console.log(k,v);
+        const [k, v] = line.split(/=(.*)/s);
         too.env[k] = v;
       }
     }
