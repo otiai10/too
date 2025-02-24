@@ -1,7 +1,9 @@
 
 export interface ITooFile {
     version: number;
-    include?: string[];
+    include?: {
+        env_files?: string[];
+    };
     env?: Record<string, string>;
     var?: Record<string, IVarPicker>;
     prep?: ISequential;

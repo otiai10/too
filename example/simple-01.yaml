@@ -1,5 +1,9 @@
 version: 0
 
+include:
+  env_files:
+  - ./example/some.env
+
 env:
   DATABASE_URI: postgres://postgres:password@localhost:5432/postgres
 var:
@@ -25,6 +29,8 @@ main:
     label: sleep-2
   # - name: 継続的なジョブ（長い）
   #   run: sleep 20 && echo "done 20s"
+  - name: includeの確認
+    run: echo ${MESSAGE} ${NAME}
 
 post:
   steps:

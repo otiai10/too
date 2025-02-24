@@ -11,6 +11,7 @@ export class Too {
   version: number = 0;
   env: Record<string, string> = {};
   var: Record<string, VarGenerator> = {};
+  include: { env_files: string[] } = { env_files: [] };
   public prep: SequentialExecutor;
   public main: ParallelExecutor;
   public post: SequentialExecutor;
@@ -19,6 +20,7 @@ export class Too {
     this.version = data.version;
     this.env = data.env || {};
     this.var = Object.fromEntries(Object.entries(data.var || {}).map(([k, v]) => [k, new VarGenerator(v.generate, v.collect)]));
+    this.include.env_files = data.include?.env_files || [];
     this.prep = new SequentialExecutor("PREP", data.prep);
     this.main = new ParallelExecutor("MAIN", data.main);
     this.post = new SequentialExecutor("POST", data.post);
@@ -38,6 +40,14 @@ export class Too {
       const v = await too.var[k].value();
       // console.log(`${k}=${v}`);
       too.env[k] = v;
+    }
+    for (const i in too.include.env_files) {
+      const data = await fs.promises.readFile(too.include.env_files[i]);
+      for (const line of data.toString().split("\n")) {
+        const [k, v] = line.split("=");
+        console.log(k,v);
+        too.env[k] = v;
+      }
     }
     too.prep.env = { ...too.env };
     too.main.env = { ...too.env };
