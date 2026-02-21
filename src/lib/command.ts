@@ -11,7 +11,6 @@ export class Command {
   public label: string;
 
   private command: string;
-  private args: string[];
 
   constructor(
     public oneliner: string,
@@ -20,10 +19,7 @@ export class Command {
     public logger: Logger = new DefaultLogger(),
     label?: string,
   ) {
-    // FIXME: 乱暴な分割なので、スペースを含む引数に対応する
-    const [c, ...a] = this.oneliner.split(" ");
-    this.command = c;
-    this.args = a;
+    this.command = this.oneliner.split(" ")[0];
     this.label = label || this.command;
   }
 
@@ -34,7 +30,7 @@ export class Command {
   
     this.logger.accept(this.label, this.color, this.oneliner);
 
-    const stream = child_process.spawn(this.command, this.args, {
+    const stream = child_process.spawn(this.oneliner, {
       detached: false,
       env: {
         ...process.env, ...this.env,
