@@ -17,6 +17,8 @@ export class SequentialExecutor {
       const cmd = new Command(step.run, env, getColorByIndex(i), logger, step.label);
       this.steps.push(cmd);
     }
+    const maxWidth = this.steps.reduce((max, cmd) => Math.max(max, cmd.label.length), 0);
+    this.logger.maxLabelWidth = Math.max(this.logger.maxLabelWidth, maxWidth);
   }
   async run() {
     if (this.steps.length === 0) return;
@@ -42,6 +44,8 @@ export class ParallelExecutor {
       const cmd = new Command(job.run, env, getColorByIndex(i), logger, job.label);
       this.jobs.push(cmd);
     }
+    const maxWidth = this.jobs.reduce((max, cmd) => Math.max(max, cmd.label.length), 0);
+    this.logger.maxLabelWidth = Math.max(this.logger.maxLabelWidth, maxWidth);
   }
   async run() {
     this.logger.stage(this.state);
