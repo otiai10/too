@@ -88,9 +88,11 @@ export class Too {
 
   async run(): Promise<number> {
     process.on("SIGINT", async () => {
+      process.stdout.write("\n\uD83D\uDC4B Received SIGINT, shutting down...\n");
       await this.main.cleanup("SIGINT");
       await this.post.run();
-      process.exit(2);
+      process.stdout.write("\uD83D\uDC4B All processes terminated.\n");
+      process.exit(0);
     });
     try {
       await this.prep.run();
