@@ -43,14 +43,16 @@ describe("ParallelExecutor.cleanup", () => {
       {},
       logger,
     );
-    const running = ex.run();
+    // run() rejects once the job is killed by a signal (wait() sees a non-zero exit);
+    // attach the catch synchronously so there is never an unhandled-rejection window.
+    const running = ex.run().catch(() => undefined);
 
     await waitFor(() => fs.existsSync(pidfile) && fs.readFileSync(pidfile, "utf8").trim().length > 0);
     const grandchildPid = parseInt(fs.readFileSync(pidfile, "utf8").trim(), 10);
     expect(alive(grandchildPid)).toBe(true);
 
     await ex.cleanup("SIGTERM");
-    await running.catch(() => undefined); // killed by signal -> wait() rejects; that's expected
+    await running;
 
     await waitFor(() => !alive(grandchildPid));
     expect(alive(grandchildPid)).toBe(false);
