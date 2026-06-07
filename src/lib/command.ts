@@ -19,7 +19,12 @@ export class Command {
     public logger: Logger = new DefaultLogger(),
     label?: string,
   ) {
-    this.command = this.oneliner.split(" ")[0];
+    // The binary is the first token that is not a leading `KEY=value` env
+    // assignment (e.g. `FOO=bar node app.js` resolves to `node`, not `FOO=bar`). (#532)
+    const tokens = this.oneliner.trim().split(/\s+/);
+    let i = 0;
+    while (i < tokens.length - 1 && /^[A-Za-z_]\w*=/.test(tokens[i])) i++;
+    this.command = tokens[i] || "";
     this.label = label || this.command;
   }
 

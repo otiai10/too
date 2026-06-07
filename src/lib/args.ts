@@ -14,7 +14,13 @@ export class Args {
     public parse(argv: string[]): string[] {
         this.raw = argv.slice(2);
         const all = this.raw.reduce<string[]>((ctx, v) => {
-            if (/=/.test(v)) { return ctx.concat(v.split("=")); }
+            // Desugar `--flag=value` only for flag-like tokens, splitting on the
+            // first `=` so command values (e.g. `-c 'vite --port=5173'`) and
+            // values that themselves contain `=` pass through intact. (#295)
+            if (/^-/.test(v) && v.includes("=")) {
+                const i = v.indexOf("=");
+                return ctx.concat([v.slice(0, i), v.slice(i + 1)]);
+            }
             return ctx.concat([v]);
         }, []);
         const rest = [];
