@@ -19,12 +19,11 @@ version: 0
 #     validate:
 #     - run: gcloud auth list
 
+# `include.env_files` merges KEY=value env files into the environment. This is the
+# only supported include form today; nested too-file includes are not implemented.
 include:
-  - secrets.local.yaml
-  - too.local.extends.yaml
-# must_include:
-#   - xxx
-#   - yyy
+  env_files:
+  - ./example/secrets.env
 
 env:
   PROJECT_ID: triax-football

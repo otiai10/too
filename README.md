@@ -75,6 +75,24 @@ then
 % too ./too.local.yaml
 ```
 
+## Including env files
+
+You can merge `KEY=value` env files into the environment with `include.env_files`.
+Paths are resolved from the current working directory.
+
+```yaml
+# too.local.yaml
+include:
+  env_files:
+  - ./example/secrets.env   # KEY=value lines, merged into the environment
+main:
+  jobs:
+  - run: echo $API_TOKEN
+```
+
+`env_files` is the only supported include form; the listed files are read as
+`KEY=value` pairs (not as nested too-files). See `example/too.local.yaml`.
+
 # Install
 
 ```sh
