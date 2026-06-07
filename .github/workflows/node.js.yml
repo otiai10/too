@@ -9,33 +9,39 @@ on:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        node-version: [18.x, 20.x, 22.x]
+        node-version: [20.x, 22.x, 24.x]
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6
       with:
         node-version: ${{ matrix.node-version }}
+        cache: 'npm'
     - run: npm ci
     - run: npm run build
     - run: npm run lint
     - run: npm test -- --coverage
-    # - run: npm run test:bin
+    # The binary smoke test uses POSIX shell builtins (sleep/echo), so skip it on Windows.
+    - name: Smoke-test the built binary
+      if: runner.os != 'Windows'
+      run: npm run test:bin
   coverage:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: Use Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6
       with:
-        node-version: 20.x
+        node-version: 24.x
+        cache: 'npm'
     - run: npm ci
     - run: npm test -- --coverage
-    - uses: codecov/codecov-action@v4
+    - uses: codecov/codecov-action@v7
       with:
-        file: ./coverage/coverage-final.json
+        files: ./coverage/coverage-final.json
         token: ${{ secrets.CODECOV_TOKEN }}
