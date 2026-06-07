@@ -13,6 +13,10 @@ class NoopLogger extends Logger {
 
 const logger = new NoopLogger();
 
+// These tests spawn real POSIX shells and rely on process-group signalling
+// (process.kill(-pid), `cmd &`, SIGTERM). That model is POSIX-only, so skip on Windows.
+const itPosix = process.platform === "win32" ? it.skip : it;
+
 /** Returns true if a process with the given pid is still alive. */
 function alive(pid: number): boolean {
   try {
@@ -32,7 +36,7 @@ async function waitFor(predicate: () => boolean, timeoutMs = 5000): Promise<void
 }
 
 describe("ParallelExecutor.cleanup", () => {
-  it("terminates the whole process tree, not just the direct child (#529)", async () => {
+  itPosix("terminates the whole process tree, not just the direct child (#529)", async () => {
     const pidfile = path.join(os.tmpdir(), `too-grandchild-${process.pid}.pid`);
     if (fs.existsSync(pidfile)) fs.unlinkSync(pidfile);
 
@@ -60,7 +64,7 @@ describe("ParallelExecutor.cleanup", () => {
     fs.unlinkSync(pidfile);
   }, 20000);
 
-  it("resolves immediately for already-exited processes", async () => {
+  itPosix("resolves immediately for already-exited processes", async () => {
     const ex = new ParallelExecutor("MAIN", { jobs: [{ run: "true" }] }, {}, logger);
     await ex.run(); // job exits 0 on its own
     await expect(ex.cleanup("SIGTERM")).resolves.toEqual([true]);
@@ -68,7 +72,7 @@ describe("ParallelExecutor.cleanup", () => {
 });
 
 describe("Too failure path", () => {
-  it("tears down surviving sibling jobs when one job fails (#530)", async () => {
+  itPosix("tears down surviving sibling jobs when one job fails (#530)", async () => {
     const too = await Too.direct(['node -e "process.exit(1)"', "sleep 30"]);
     too.logger = logger;
     too.main.logger = logger;
