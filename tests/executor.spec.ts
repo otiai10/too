@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
-import { ParallelExecutor } from "../src/lib/executor";
+import { ParallelExecutor, SequentialExecutor } from "../src/lib/executor";
 import { Logger } from "../src/lib/logger";
 import { Too } from "../src/lib/too";
 
@@ -12,6 +12,16 @@ class NoopLogger extends Logger {
 }
 
 const logger = new NoopLogger();
+
+// Records what reached the logger, so tests can assert which steps ran / were logged.
+class RecordingLogger extends Logger {
+  public outputs: string[] = [];
+  stage(): void { /* noop */ }
+  accept(): void { /* noop */ }
+  output(_label: string, _color: string, stdout: Buffer | string, stderr: Buffer | string): void {
+    this.outputs.push(`${stdout}${stderr}`);
+  }
+}
 
 // These tests spawn real POSIX shells and rely on process-group signalling
 // (process.kill(-pid), `cmd &`, SIGTERM). That model is POSIX-only, so skip on Windows.
@@ -85,4 +95,57 @@ describe("Too failure path", () => {
     await waitFor(() => !alive(sleepProc!.pid!));
     expect(alive(sleepProc!.pid!)).toBe(false);
   }, 20000);
+});
+
+describe("SequentialExecutor ignore_error (#531)", () => {
+  // The exec() of each step is stubbed so the branch logic is tested deterministically
+  // and cross-platform (no real spawning / shell-quoting concerns).
+  function executorWith(
+    steps: { label: string; ignore_error?: boolean }[],
+    behaviors: (() => Promise<number>)[],
+    rec: RecordingLogger,
+  ): SequentialExecutor {
+    const def = { steps: steps.map((s) => ({ run: `cmd-${s.label}`, label: s.label, ignore_error: s.ignore_error })) };
+    const ex = new SequentialExecutor("PREP", def, {}, rec);
+    ex.steps.forEach((cmd, i) => { cmd.exec = behaviors[i]; });
+    return ex;
+  }
+
+  it("continues the stage when an ignored step fails, and logs it", async () => {
+    const rec = new RecordingLogger();
+    const second = jest.fn(async () => 0);
+    const ex = executorWith(
+      [{ label: "boom", ignore_error: true }, { label: "ok" }],
+      [async () => { throw { code: 3, message: "boom failed" }; }, second],
+      rec,
+    );
+    await expect(ex.run()).resolves.toBeUndefined();
+    expect(second).toHaveBeenCalled();
+    expect(rec.outputs.some((o) => /ignored error/.test(o))).toBe(true);
+  });
+
+  it("still aborts the stage when a non-ignored step fails", async () => {
+    const rec = new RecordingLogger();
+    const second = jest.fn(async () => 0);
+    const ex = executorWith(
+      [{ label: "boom" }, { label: "ok" }],
+      [async () => { throw { code: 3, message: "boom failed" }; }, second],
+      rec,
+    );
+    await expect(ex.run()).rejects.toMatchObject({ code: 3 });
+    expect(second).not.toHaveBeenCalled();
+  });
+
+  it("ignores a command-not-found (127) failure too", async () => {
+    const rec = new RecordingLogger();
+    const second = jest.fn(async () => 0);
+    const ex = executorWith(
+      [{ label: "missing", ignore_error: true }, { label: "ok" }],
+      [async () => { throw { code: 127, msg: "command not found: nope" }; }, second],
+      rec,
+    );
+    await expect(ex.run()).resolves.toBeUndefined();
+    expect(second).toHaveBeenCalled();
+    expect(rec.outputs.some((o) => /command not found/.test(o))).toBe(true);
+  });
 });

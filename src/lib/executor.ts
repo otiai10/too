@@ -23,9 +23,20 @@ export class SequentialExecutor {
   async run() {
     if (this.steps.length === 0) return;
     this.logger.stage(this.state);
-    for (const step of this.steps) {
+    for (let i = 0; i < this.steps.length; i++) {
+      const step = this.steps[i];
       step.env = { ...step.env, ...this.env };
-      await step.exec();
+      try {
+        await step.exec();
+      } catch (e) {
+        // Honor `ignore_error`: log the failure and continue instead of aborting
+        // the stage (e.g. `post: pkill datastore`, which exits non-zero when no
+        // process matches). Any failure is swallowed, including command-not-found. (#531)
+        if (!this.definition.steps[i]?.ignore_error) throw e;
+        const err = e as { code?: number | string; message?: string; msg?: string };
+        const reason = err.message || err.msg || `exit code ${err.code}`;
+        this.logger.output(step.label, step.color, "", `ignored error: ${reason}`);
+      }
     }
   }
 }
