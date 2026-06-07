@@ -56,19 +56,23 @@ export class ParallelExecutor {
     await this.wait();
   }
   public async cleanup(signal: NodeJS.Signals): Promise<boolean[]> {
-    const promises: Promise<boolean>[] = [];
-    this.procs.forEach((proc) => {
-      promises.push(new Promise((resolve) => {
+    const promises: Promise<boolean>[] = this.procs.map((proc) => {
+      return new Promise<boolean>((resolve) => {
+        // Already exited (e.g. the job that triggered the failure): nothing to kill.
+        if (proc.exitCode !== null || proc.signalCode !== null) return resolve(true);
+        // Resolve only once the child has actually closed, so callers can await teardown.
+        proc.on("close", () => resolve(true));
         try {
+          // Negative pid signals the whole process group (requires detached children).
           if (proc.pid) process.kill(-proc.pid, signal);
+          else resolve(true);
         } catch (err) {
           const error = err as { code?: string, message?: string };
           if (error.code === "ESRCH") return resolve(true);
-          console.error((err as { message?: string }).message);
+          console.error(error.message);
           resolve(false);
         }
-        proc.on("close", () => resolve(true));
-      }));
+      });
     });
     return Promise.all(promises);
   }

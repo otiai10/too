@@ -31,7 +31,9 @@ export class Command {
     this.logger.accept(this.label, this.color, this.oneliner);
 
     const stream = child_process.spawn(this.oneliner, {
-      detached: false,
+      // detached makes each child a process-group leader, so cleanup() can
+      // signal the whole tree (shell + grandchildren) via process.kill(-pid).
+      detached: true,
       env: {
         ...process.env, ...this.env,
         PATH: this.path().join(path.delimiter),

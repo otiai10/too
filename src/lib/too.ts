@@ -89,7 +89,9 @@ export class Too {
   async run(): Promise<number> {
     process.on("SIGINT", async () => {
       process.stdout.write("\n[too] \uD83D\uDC4B Received SIGINT, shutting down...\n");
-      await this.main.cleanup("SIGINT");
+      // Terminate with SIGTERM, not SIGINT: a non-interactive shell sets SIGINT to
+      // ignored for backgrounded (`cmd &`) jobs, so re-sending SIGINT would leak them.
+      await this.main.cleanup("SIGTERM");
       await this.post.run();
       process.stdout.write("[too] \uD83D\uDC4B All processes terminated.\n");
       process.exit(0);
@@ -103,6 +105,9 @@ export class Too {
     try {
       await this.main.run();
     } catch (e) {
+      // One job failed; tear down the surviving siblings before post, otherwise
+      // they leak (the SIGINT handler is the only other place that cleans up).
+      await this.main.cleanup("SIGTERM");
       await this.post.run();
       return (e as { code: number }).code || 1;
     }
